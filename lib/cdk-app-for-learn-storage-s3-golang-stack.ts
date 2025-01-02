@@ -1,8 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
+import {aws_iam, CfnOutput} from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import { Construct } from 'constructs';
-import {CfnAccessKey, Group, Role, User} from "aws-cdk-lib/aws-iam";
-import {aws_iam, CfnOutput} from "aws-cdk-lib";
+import {BucketEncryption} from 'aws-cdk-lib/aws-s3';
+import {Construct} from 'constructs';
+import {CfnAccessKey, Group, PolicyStatement, User} from "aws-cdk-lib/aws-iam";
+
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
@@ -43,6 +45,35 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
     new CfnOutput(this,"secretAccessKey",{
         value: accessKey.attrSecretAccessKey
     })
+
+
+      const s3BucketName= "tubely-forgolang-s3-course"
+
+        const s3Bucket = new s3.Bucket(this, 'CdkAppForLearnStorageS3GolangBucket', {
+            bucketName: s3BucketName,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            versioned: false,
+            objectLockEnabled: false,
+            blockPublicAccess: {
+                blockPublicAcls: false,
+                blockPublicPolicy: false,
+                ignorePublicAcls: true,
+                restrictPublicBuckets: false
+            }
+        })
+
+
+        s3Bucket.addToResourcePolicy(new PolicyStatement({
+            actions: ['s3:GetObject'],
+            resources: [s3Bucket.arnForObjects('*')],
+            principals: [new aws_iam.AnyPrincipal()],
+        }))
+
+
+        new CfnOutput(this, "s3BucketName", {
+
+            value: s3Bucket.bucketName
+        })
 
   }
 }
