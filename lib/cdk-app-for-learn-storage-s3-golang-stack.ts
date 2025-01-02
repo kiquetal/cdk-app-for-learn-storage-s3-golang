@@ -57,7 +57,7 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
             blockPublicAccess: {
                 blockPublicAcls: false,
                 blockPublicPolicy: false,
-                ignorePublicAcls: true,
+                ignorePublicAcls: false,
                 restrictPublicBuckets: false
             }
         })
@@ -65,7 +65,8 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
 
         s3Bucket.addToResourcePolicy(new PolicyStatement({
             actions: ['s3:GetObject'],
-            resources: [s3Bucket.arnForObjects('*')],
+            resources: [s3Bucket.arnForObjects('portrait/*'),
+                        s3Bucket.arnForObjects('landscape/*')],
             principals: [new aws_iam.AnyPrincipal()],
         }))
 
