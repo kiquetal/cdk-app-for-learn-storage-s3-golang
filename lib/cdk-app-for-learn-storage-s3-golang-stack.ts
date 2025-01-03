@@ -28,11 +28,26 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
 
 
 
+      /*
       group.addManagedPolicy({
             managedPolicyArn: 'arn:aws:iam::aws:policy/AdministratorAccess'
       })
+*/
+      const policy = new aws_iam.ManagedPolicy(this, 'CdkAppForLearnStorageS3GolangPolicyM', {
 
+            managedPolicyName: 'manager-from-home',
+            statements: [
+                new PolicyStatement({
+                    sid: 'AllowAllActions',
+                    actions: ['iam:*','s3:*'],
+                    resources: ['*'],
+                    effect: aws_iam.Effect.ALLOW,
 
+                })
+            ]
+      } )
+
+    group.addManagedPolicy(policy)
     group.addUser(cliUser)
     const accessKey = new CfnAccessKey(this, 'CdkAppForLearnStorageS3GolangAccessKey', {
         userName: cliUser.userName
