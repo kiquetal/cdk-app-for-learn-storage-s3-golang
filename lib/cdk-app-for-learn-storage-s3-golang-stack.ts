@@ -47,6 +47,26 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
             ]
       } )
 
+      const tubelyS3Policy = new aws_iam.ManagedPolicy(this, 'CdkAppForLearnStorageS3GolangPolicyTubelyS3', {
+
+          managedPolicyName: 'tubely-s3',
+          statements: [
+              new PolicyStatement({
+                  sid: 'AllowAllActions',
+                  actions: ['s3:PutObject', 's3:GetObject', 's3:ListBucket', 's3:DeleteObject'],
+                  resources: [ 'arn:aws:s3:::tubely-forgolang-s3-course/*', 'arn:aws:s3:::tubely-forgolang-s3-course'],
+                  effect: aws_iam.Effect.ALLOW
+              })
+          ]
+      } )
+
+    const tubleS3Role = new aws_iam.Role(this, 'CdkAppForLearnStorageS3GolangRole', {
+
+        assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
+        roleName: 'tubely-app',
+        managedPolicies: [tubelyS3Policy]
+    }   )
+
     group.addManagedPolicy(policy)
     group.addUser(cliUser)
     const accessKey = new CfnAccessKey(this, 'CdkAppForLearnStorageS3GolangAccessKey', {
@@ -91,5 +111,21 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
             value: s3Bucket.bucketName
         })
 
+      const s3privateBucket = new s3.Bucket(this, 'CdkAppForLearnStorageS3GolangPrivateBucket', {
+            bucketName: 'tubely-private-s3-course',
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            versioned: false,
+            objectLockEnabled: false,
+            blockPublicAccess: {
+                blockPublicAcls: true,
+                blockPublicPolicy: true,
+                ignorePublicAcls: true,
+                restrictPublicBuckets: true
+            }
+      } )
+
+      new CfnOutput(this, "s3PrivateBucketName", {
+            value: s3privateBucket.bucketName
+      } )
   }
 }
