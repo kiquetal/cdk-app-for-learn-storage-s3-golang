@@ -132,6 +132,7 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
           }
       } );
 
+
       new CfnOutput(this, "cloudFrontDomainName", {
             value: cfnDistribution.domainName
       })
