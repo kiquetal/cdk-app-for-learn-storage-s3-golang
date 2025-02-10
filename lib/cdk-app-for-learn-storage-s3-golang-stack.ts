@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import {aws_iam, CfnOutput} from 'aws-cdk-lib';
+import {aws_cloudfront, aws_cloudfront_origins, aws_iam, CfnOutput} from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import {BucketEncryption} from 'aws-cdk-lib/aws-s3';
 import {Construct} from 'constructs';
@@ -39,7 +39,7 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
             statements: [
                 new PolicyStatement({
                     sid: 'AllowAllActions',
-                    actions: ['iam:*','s3:*'],
+                    actions: ['iam:*','s3:*','cloudfront:*'],
                     resources: ['*'],
                     effect: aws_iam.Effect.ALLOW,
 
@@ -124,8 +124,17 @@ export class CdkAppForLearnStorageS3GolangStack extends cdk.Stack {
             }
       } )
 
-      new CfnOutput(this, "s3PrivateBucketName", {
-            value: s3privateBucket.bucketName
-      } )
-  }
+      const cfnDistribution = new aws_cloudfront.Distribution(this, 'CdkAppForLearnStorageS3GolangDistribution', {
+          defaultBehavior:{
+              origin: aws_cloudfront_origins.S3BucketOrigin.withOriginAccessControl(s3privateBucket),
+                allowedMethods: aws_cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+              viewerProtocolPolicy: aws_cloudfront.ViewerProtocolPolicy.HTTPS_ONLY
+          }
+      } );
+
+      new CfnOutput(this, "cloudFrontDomainName", {
+            value: cfnDistribution.domainName
+      })
+
+}
 }
